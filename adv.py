@@ -75,33 +75,48 @@ def find_a_path():
                 adjacent_rooms = []
                 for direction in current_exits:
                     if direction == "n":
-                        adjacent_rooms.append(("n", current_room.n_to))
+                        # adjacent_rooms.append(("n", current_room.n_to))
+                        try:
+                            adjacent_rooms.append({'direction': 'n', 'room': current_room.n_to, 'times_visited': new_visited[current_room.n_to.id]})
+                        except:
+                            adjacent_rooms.append({'direction': 'n', 'room': current_room.n_to, 'times_visited': 0})
                     elif direction == "s":
-                        adjacent_rooms.append(("s", current_room.s_to))
+                        try:
+                            adjacent_rooms.append({'direction': 's', 'room': current_room.s_to, 'times_visited': new_visited[current_room.s_to.id]})
+                        except:
+                            adjacent_rooms.append({'direction': 's', 'room': current_room.s_to, 'times_visited': 0})
                     elif direction == "e":
-                        adjacent_rooms.append(("e", current_room.e_to))
+                        try:
+                            adjacent_rooms.append({'direction': 'e', 'room': current_room.e_to, 'times_visited': new_visited[current_room.e_to.id]})
+                        except:
+                            adjacent_rooms.append({'direction': 'e', 'room': current_room.e_to, 'times_visited': 0})
                     elif direction == "w":
-                        adjacent_rooms.append(("w", current_room.w_to))
+                        try:
+                            adjacent_rooms.append({'direction': 'w', 'room': current_room.w_to, 'times_visited': new_visited[current_room.w_to.id]})
+                        except:
+                            adjacent_rooms.append({'direction': 'w', 'room': current_room.w_to, 'times_visited': 0})
                 
-                # shuffle the adjacent rooms for randomness
+                # sort the adjacent rooms by times visited
                 try:
-                    random.shuffle(adjacent_rooms)
+                    def visited_key(e):
+                        return e['times_visited']
+                    adjacent_rooms.sort(key=visited_key)
                 except:
-                    print(f"Shuffle failed. Adjacent rooms were: {adjacent_rooms}.\nCurrent path was length {len(path)}.\nVisited was {len(new_visited)}")
+                    print(f"Sorting failed. Adjacent rooms were: {adjacent_rooms}.\nCurrent path was length {len(path)}.\nVisited was {len(new_visited)}")
 
                 # if the backup_light is off...
                 if backup_light == False:
                     # check for rooms which have not been visited
                     unvisited_rooms = []
-                    for room_tuple in adjacent_rooms:
-                        if room_tuple[1].id not in new_visited:
-                            unvisited_rooms.append(room_tuple)
+                    for room_dict in adjacent_rooms:
+                        if room_dict['room'].id not in new_visited:
+                            unvisited_rooms.append(room_dict)
                     
                     # if there are adjacent unvisited rooms, rerun the recursion for those rooms
                     if len(unvisited_rooms) > 0:
-                        for room_tuple in unvisited_rooms:
-                            new_path = path + [room_tuple[0]]
-                            new_room = room_tuple[1]
+                        for room_dict in unvisited_rooms:
+                            new_path = path + [room_dict['direction']]
+                            new_room = room_dict['room']
                             path_recursion(new_visited, new_path, new_room)
                     
                     # if there are no adjacent unvisited rooms, turn the backup light on and search for a new room
@@ -114,7 +129,7 @@ def find_a_path():
                             pass
                         # rerun recursion at searched room
                         else:
-                            print(f"found a new room! Room {search_results[2].id}")
+                            # print(f"found a new room! Room {search_results[2].id}")
                             path_recursion(search_results[0], search_results[1], search_results[2])
 
     # helper function to find an unvisited room
@@ -130,37 +145,52 @@ def find_a_path():
             # get a list of the actual rooms based on the exits provided
             adjacent_rooms = []
             for direction in current_exits:
-                if direction == "n":
-                    adjacent_rooms.append(("n", current_room.n_to))
-                elif direction == "s":
-                    adjacent_rooms.append(("s", current_room.s_to))
-                elif direction == "e":
-                    adjacent_rooms.append(("e", current_room.e_to))
-                elif direction == "w":
-                    adjacent_rooms.append(("w", current_room.w_to))
+                    if direction == "n":
+                        # adjacent_rooms.append(("n", current_room.n_to))
+                        try:
+                            adjacent_rooms.append({'direction': 'n', 'room': current_room.n_to, 'times_visited': visited[current_room.n_to.id]})
+                        except:
+                            adjacent_rooms.append({'direction': 'n', 'room': current_room.n_to, 'times_visited': 0})
+                    elif direction == "s":
+                        try:
+                            adjacent_rooms.append({'direction': 's', 'room': current_room.s_to, 'times_visited': visited[current_room.s_to.id]})
+                        except:
+                            adjacent_rooms.append({'direction': 's', 'room': current_room.s_to, 'times_visited': 0})
+                    elif direction == "e":
+                        try:
+                            adjacent_rooms.append({'direction': 'e', 'room': current_room.e_to, 'times_visited': visited[current_room.e_to.id]})
+                        except:
+                            adjacent_rooms.append({'direction': 'e', 'room': current_room.e_to, 'times_visited': 0})
+                    elif direction == "w":
+                        try:
+                            adjacent_rooms.append({'direction': 'w', 'room': current_room.w_to, 'times_visited': visited[current_room.w_to.id]})
+                        except:
+                            adjacent_rooms.append({'direction': 'w', 'room': current_room.w_to, 'times_visited': 0})
 
-            # shuffle the adjacent rooms for randomness
+            # sort the rooms by times visited
             try:
-                random.shuffle(adjacent_rooms)
+                def visited_key(e):
+                    return e['times_visited']
+                adjacent_rooms.sort(key=visited_key)
             except:
-                print(f"Helper shuffle failed. Adjacent rooms were: {adjacent_rooms}.\nCurrent path was length {len(path)}.\nVisited was {len(visited)}")
+                print(f"Helper sort failed. Adjacent rooms were: {adjacent_rooms}.\nCurrent path was length {len(path)}.\nVisited was {len(visited)}")
             
             # check for rooms which have not been visited
             unvisited_rooms = []
-            for room_tuple in adjacent_rooms:
-                if room_tuple[1].id not in visited:
-                    unvisited_rooms.append(room_tuple)
+            for room_dict in adjacent_rooms:
+                if room_dict['room'].id not in visited:
+                    unvisited_rooms.append(room_dict)
 
             # if there are adjacent unvisited rooms, return the current room and the path
             if len(unvisited_rooms) > 0:
                 backup_light = False
                 return ([visited, path, current_room])
             else:
-                for room_tuple in adjacent_rooms:
-                    new_path = path + [room_tuple[0]]
-                    new_room = room_tuple[1]
+                for room_dict in adjacent_rooms:
+                    new_path = path + [room_dict['direction']]
+                    new_room = room_dict['room']
                     new_visited = visited.copy()
-                    new_visited[room_tuple[1].id] += 1
+                    new_visited[room_dict['room'].id] += 1
                     # print(f"Current room is {current_room.id}. Moving to {new_room.id}. #visited is {new_visited}")
                     return find_unvisited(new_visited, new_path, new_room)
 
