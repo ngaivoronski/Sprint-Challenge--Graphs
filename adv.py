@@ -341,9 +341,9 @@ def bft_path2(start_time):
 
         # check the time and path length to see if you've gone over
         current_time = timer()
-        if len(current_data['path']) > 990:
+        if len(current_data['path']) >= 970:
             return "overtime"
-        elif current_time - start_time > 1:
+        elif current_time - start_time > .5:
             return "overtime"
 
         # check if the current data has found a complete path
@@ -435,9 +435,9 @@ def find_unvisited(data, start_time):
         current_data = qq2.dequeue()
 
         current_time = timer()
-        if len(current_data['path']) > 990:
+        if len(current_data['path']) >= 970:
             return "overtime"
-        elif current_time - start_time > 1:
+        elif current_time - start_time > .5:
             return "overtime"
 
         current_exits = current_data['current_room'].get_exits()
