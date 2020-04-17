@@ -5,6 +5,8 @@ from world import World
 import random
 from ast import literal_eval
 
+from timeit import default_timer as timer
+
 # Load world
 world = World()
 
@@ -30,6 +32,533 @@ player = Player(world.starting_room)
 traversal_path = []
 
 
+####################################### SOLUTION ONE #######################################
+
+# print(world.rooms)
+# print(len(world.rooms))
+
+# # set up the global variables
+# global_done = False
+# backup_light = False
+
+# def find_a_path():
+
+#     # Main recursion function
+#     def path_recursion(visited={}, path=[], current_room=world.starting_room):
+#         # if a path has been found, stop the function
+#         global global_done
+#         global traversal_path
+#         global backup_light
+        
+#         if global_done == True or backup_light == True:
+#             pass
+#         else:
+#             # check if your current room is inside the visited dictionary
+#             # if it's not, add it, if it is, iterate local room visited counter
+#             new_visited = visited.copy()
+
+#             if current_room.id in visited:
+#                 new_visited[current_room.id] += 1
+#             else:
+#                 new_visited[current_room.id] = 1
+
+#             # if the visited dictionary contains all of the world rooms, stop the script and print the path
+#             if len(new_visited) >= len(world.rooms):
+#                 global_done = True
+#                 print(f"The path is finished and we have visited {len(new_visited)} rooms")
+#                 print(f"the path took {len(path)} steps")
+#                 traversal_path = path
+
+#             else:
+#                 # get a list of exits from your current position
+#                 current_exits = current_room.get_exits()
+
+#                 # get a list of the actual rooms based on the exits provided
+#                 adjacent_rooms = []
+#                 for direction in current_exits:
+#                     if direction == "n":
+#                         # adjacent_rooms.append(("n", current_room.n_to))
+#                         try:
+#                             adjacent_rooms.append({'direction': 'n', 'room': current_room.n_to, 'times_visited': new_visited[current_room.n_to.id]})
+#                         except:
+#                             adjacent_rooms.append({'direction': 'n', 'room': current_room.n_to, 'times_visited': 0})
+#                     elif direction == "s":
+#                         try:
+#                             adjacent_rooms.append({'direction': 's', 'room': current_room.s_to, 'times_visited': new_visited[current_room.s_to.id]})
+#                         except:
+#                             adjacent_rooms.append({'direction': 's', 'room': current_room.s_to, 'times_visited': 0})
+#                     elif direction == "e":
+#                         try:
+#                             adjacent_rooms.append({'direction': 'e', 'room': current_room.e_to, 'times_visited': new_visited[current_room.e_to.id]})
+#                         except:
+#                             adjacent_rooms.append({'direction': 'e', 'room': current_room.e_to, 'times_visited': 0})
+#                     elif direction == "w":
+#                         try:
+#                             adjacent_rooms.append({'direction': 'w', 'room': current_room.w_to, 'times_visited': new_visited[current_room.w_to.id]})
+#                         except:
+#                             adjacent_rooms.append({'direction': 'w', 'room': current_room.w_to, 'times_visited': 0})
+                
+#                 # sort the adjacent rooms by times visited
+#                 try:
+#                     def visited_key(e):
+#                         return e['times_visited']
+#                     adjacent_rooms.sort(key=visited_key)
+#                 except:
+#                     print(f"Sorting failed. Adjacent rooms were: {adjacent_rooms}.\nCurrent path was length {len(path)}.\nVisited was {len(new_visited)}")
+
+#                 # if the backup_light is off...
+#                 if backup_light == False:
+#                     # check for rooms which have not been visited
+#                     unvisited_rooms = []
+#                     for room_dict in adjacent_rooms:
+#                         if room_dict['room'].id not in new_visited:
+#                             unvisited_rooms.append(room_dict)
+                    
+#                     # if there are adjacent unvisited rooms, rerun the recursion for those rooms
+#                     if len(unvisited_rooms) > 0:
+#                         for room_dict in unvisited_rooms:
+#                             new_path = path + [room_dict['direction']]
+#                             new_room = room_dict['room']
+#                             path_recursion(new_visited, new_path, new_room)
+                    
+#                     # if there are no adjacent unvisited rooms, turn the backup light on and search for a new room
+#                     else:
+#                         backup_light = True
+#                         # search for a room with adjacent unvisited
+#                         search_results = find_unvisited(new_visited, path, current_room)
+#                         # if search results come up with nothing, pass
+#                         if search_results is None:
+#                             pass
+#                         # rerun recursion at searched room
+#                         else:
+#                             # print(f"found a new room! Room {search_results[2].id}")
+#                             path_recursion(search_results[0], search_results[1], search_results[2])
+
+#     # helper function to find an unvisited room
+#     def find_unvisited(visited, path, current_room):
+#         global backup_light
+
+#         if backup_light == False:
+#             pass
+#         else:
+#             # get a list of exits from your current position
+#             current_exits = current_room.get_exits()
+
+#             # get a list of the actual rooms based on the exits provided
+#             adjacent_rooms = []
+#             for direction in current_exits:
+#                     if direction == "n":
+#                         # adjacent_rooms.append(("n", current_room.n_to))
+#                         try:
+#                             adjacent_rooms.append({'direction': 'n', 'room': current_room.n_to, 'times_visited': visited[current_room.n_to.id]})
+#                         except:
+#                             adjacent_rooms.append({'direction': 'n', 'room': current_room.n_to, 'times_visited': 0})
+#                     elif direction == "s":
+#                         try:
+#                             adjacent_rooms.append({'direction': 's', 'room': current_room.s_to, 'times_visited': visited[current_room.s_to.id]})
+#                         except:
+#                             adjacent_rooms.append({'direction': 's', 'room': current_room.s_to, 'times_visited': 0})
+#                     elif direction == "e":
+#                         try:
+#                             adjacent_rooms.append({'direction': 'e', 'room': current_room.e_to, 'times_visited': visited[current_room.e_to.id]})
+#                         except:
+#                             adjacent_rooms.append({'direction': 'e', 'room': current_room.e_to, 'times_visited': 0})
+#                     elif direction == "w":
+#                         try:
+#                             adjacent_rooms.append({'direction': 'w', 'room': current_room.w_to, 'times_visited': visited[current_room.w_to.id]})
+#                         except:
+#                             adjacent_rooms.append({'direction': 'w', 'room': current_room.w_to, 'times_visited': 0})
+
+#             # sort the rooms by times visited
+#             try:
+#                 def visited_key(e):
+#                     return e['times_visited']
+#                 adjacent_rooms.sort(key=visited_key)
+#             except:
+#                 print(f"Helper sort failed. Adjacent rooms were: {adjacent_rooms}.\nCurrent path was length {len(path)}.\nVisited was {len(visited)}")
+            
+#             # check for rooms which have not been visited
+#             unvisited_rooms = []
+#             for room_dict in adjacent_rooms:
+#                 if room_dict['room'].id not in visited:
+#                     unvisited_rooms.append(room_dict)
+
+#             # if there are adjacent unvisited rooms, return the current room and the path
+#             if len(unvisited_rooms) > 0:
+#                 backup_light = False
+#                 return ([visited, path, current_room])
+#             else:
+#                 for room_dict in adjacent_rooms:
+#                     new_path = path + [room_dict['direction']]
+#                     new_room = room_dict['room']
+#                     new_visited = visited.copy()
+#                     new_visited[room_dict['room'].id] += 1
+#                     # print(f"Current room is {current_room.id}. Moving to {new_room.id}. #visited is {new_visited}")
+#                     return find_unvisited(new_visited, new_path, new_room)
+
+#     path_recursion()
+
+# find_a_path()
+
+####################################### SOLUTION TWO #######################################
+
+# class Queue():
+#     def __init__(self):
+#         self.queue = []
+#     def enqueue(self, value):
+#         self.queue.append(value)
+#     def dequeue(self):
+#         if self.size() > 0:
+#             return self.queue.pop(0)
+#         else:
+#             return None
+#     def size(self):
+#         return len(self.queue)
+
+# def bft_path():
+#     # Create a queue and enqueue the starting room
+#     qq = Queue()
+#     # Set up the dictionary
+#     starting_dict = {'visited': {world.starting_room.id: 1}, 'path': [], 'current_room': world.starting_room, 'visited_length': 1}
+
+#     # get a list of all the room ids
+#     world_room_ids = []
+#     for room in world.rooms:
+#         world_room_ids.append(room)
+#     print(world_room_ids)
+
+#     qq.enqueue(starting_dict)
+
+#     # Loop
+#     while True:
+#         # shorten the queue if it's too long
+#         # first sort the queue to favor the elements with the greatest "visited_length" - since those have been to the most rooms
+#         # then, shrink the queue to a managable size
+#         # 2,000 / 550 gets you 1,115 moves
+#         if len(qq.queue) > 2000:
+#             def visited_length(e):
+#                 return e['visited_length']
+#             qq.queue.sort(key=visited_length, reverse=True)
+#             qq.queue = qq.queue[:550]
+#             print(f"shrinking queue. New visited length is {qq.queue[0]['visited_length']}, path length is {len(qq.queue[0]['path'])} and time is {timer()}")
+        
+#         # if qq.queue[0]['visited_length'] >= 468 and len(world_room_ids) >= 499:
+#         #     for number in qq.queue[0]['visited'].keys():
+#         #         if number in world_room_ids:
+#         #             world_room_ids.remove(number)
+#         #     print(world_room_ids)
+        
+#         # dequeue / pop the first vertex
+#         current_data = qq.dequeue()
+
+
+#         # check if the current data has found a complete path
+#         if current_data['visited_length'] >= len(world.rooms):
+#             # if so, set the traversal path to the found path
+#             global traversal_path
+#             traversal_path = current_data['path']
+#             break
+
+#         # get a list of exits
+#         current_exits = current_data['current_room'].get_exits()
+
+#         # get a list of the actual rooms based on the exits - along with their direction and times visited
+#         adjacent_rooms = []
+#         for direction in current_exits:
+#             if direction == "n":
+#                 new_room = current_data['current_room'].n_to
+#                 try:
+#                     adjacent_rooms.append({ 'direction': 'n', 'room': new_room, 'times_visited': current_data['visited'][new_room] })
+#                 except:
+#                     adjacent_rooms.append({ 'direction': 'n', 'room': new_room, 'times_visited': 0 })
+#             elif direction == "s":
+#                 new_room = current_data['current_room'].s_to
+#                 try:
+#                     adjacent_rooms.append({ 'direction': 's', 'room': new_room, 'times_visited': current_data['visited'][new_room] })
+#                 except:
+#                     adjacent_rooms.append({ 'direction': 's', 'room': new_room, 'times_visited': 0 })
+#             elif direction == "e":
+#                 new_room = current_data['current_room'].e_to
+#                 try:
+#                     adjacent_rooms.append({ 'direction': 'e', 'room': new_room, 'times_visited': current_data['visited'][new_room] })
+#                 except:
+#                     adjacent_rooms.append({ 'direction': 'e', 'room': new_room, 'times_visited': 0 })
+#             elif direction == "w":
+#                 new_room = current_data['current_room'].w_to
+#                 try:
+#                     adjacent_rooms.append({ 'direction': 'w', 'room': new_room, 'times_visited': current_data['visited'][new_room] })
+#                 except:
+#                     adjacent_rooms.append({ 'direction': 'w', 'room': new_room, 'times_visited': 0 })
+                
+        
+#         # sort the adjacent rooms by times visited
+#         def visited_key(e):
+#             return e['times_visited']
+#         adjacent_rooms.sort(key=visited_key)
+        
+#         # enqueue the adjacent rooms
+#         for adj_dict in adjacent_rooms:
+#             # update the visited list for the new room
+#             new_visited = current_data['visited'].copy()
+#             try:
+#                 new_visited[adj_dict['room'].id] += 1
+#             except:
+#                 new_visited[adj_dict['room'].id] = 1
+#             # update the path
+#             new_path = current_data['path'] + [adj_dict['direction']]
+#             # compile the new data and enqueue it
+#             new_data = {'visited': new_visited, 'path': new_path, 'current_room': adj_dict['room'], 'visited_length': len(new_visited)}
+#             qq.enqueue(new_data)
+
+# bft_path()
+
+####################################### SOLUTION THREE #######################################
+
+class Queue():
+    def __init__(self):
+        self.queue = []
+    def enqueue(self, value):
+        self.queue.append(value)
+    def dequeue(self):
+        if self.size() > 0:
+            return self.queue.pop(0)
+        else:
+            return None
+    def size(self):
+        return len(self.queue)
+
+def bft_path2(start_time):
+    # Create a queue and enqueue the starting room
+    qq = Queue()
+    # Set up the dictionary
+    starting_dict = {'visited': {world.starting_room.id: 1}, 'path': [], 'current_room': world.starting_room, 'visited_length': 1}
+    qq.enqueue(starting_dict)
+
+    # Loop through until you get an answer or you go overtime
+    while True:
+        # dequeue the first item
+        current_data = qq.dequeue()
+
+        # check the time and path length to see if you've gone over
+        current_time = timer()
+        if len(current_data['path']) >= 960:
+            return "overtime"
+        elif current_time - start_time > .5:
+            return "overtime"
+
+        # check if the current data has found a complete path
+        if current_data['visited_length'] >= len(world.rooms):
+            print(f"found a solution in {current_time - start_time} seconds.")
+            return(current_data['path'])
+
+        # get a list of exits
+        current_exits = current_data['current_room'].get_exits()
+
+        # get a list of the actual rooms based on the exits - along with their direction and times visited
+        adjacent_rooms = []
+        for direction in current_exits:
+            if direction == "n":
+                new_room = current_data['current_room'].n_to
+                try:
+                    adjacent_rooms.append({ 'direction': 'n', 'room': new_room, 'times_visited': current_data['visited'][new_room.id] })
+                except:
+                    adjacent_rooms.append({ 'direction': 'n', 'room': new_room, 'times_visited': 0 })
+            elif direction == "s":
+                new_room = current_data['current_room'].s_to
+                try:
+                    adjacent_rooms.append({ 'direction': 's', 'room': new_room, 'times_visited': current_data['visited'][new_room.id] })
+                except:
+                    adjacent_rooms.append({ 'direction': 's', 'room': new_room, 'times_visited': 0 })
+            elif direction == "e":
+                new_room = current_data['current_room'].e_to
+                try:
+                    adjacent_rooms.append({ 'direction': 'e', 'room': new_room, 'times_visited': current_data['visited'][new_room.id] })
+                except:
+                    adjacent_rooms.append({ 'direction': 'e', 'room': new_room, 'times_visited': 0 })
+            elif direction == "w":
+                new_room = current_data['current_room'].w_to
+                try:
+                    adjacent_rooms.append({ 'direction': 'w', 'room': new_room, 'times_visited': current_data['visited'][new_room.id] })
+                except:
+                    adjacent_rooms.append({ 'direction': 'w', 'room': new_room, 'times_visited': 0 })
+                
+        # filter for only the unvisited rooms
+        unvisited_rooms = []
+        for room_dict in adjacent_rooms:
+            if room_dict['times_visited'] == 0:
+                unvisited_rooms.append(room_dict)
+        
+        # shuffle the unvisited rooms to choose a random direction
+        random.shuffle(unvisited_rooms)
+        
+        # enqueue the unvisited rooms
+        for adj_dict in unvisited_rooms:
+            # update the visited list for the new room
+            new_visited = current_data['visited'].copy()
+            try:
+                new_visited[adj_dict['room'].id] += 1
+            except:
+                new_visited[adj_dict['room'].id] = 1
+            # update the path
+            new_path = current_data['path'] + [adj_dict['direction']]
+            # compile the new data and enqueue it
+            new_data = {'visited': new_visited, 'path': new_path, 'current_room': adj_dict['room'], 'visited_length': len(new_visited)}
+            # print(new_data)
+            qq.enqueue(new_data)
+        
+        # if there are no unvisited rooms, run the search algorithm to find a nearby unvisited room
+        if len(unvisited_rooms) == 0:
+            found_room = find_unvisited(current_data, start_time)
+            # check the time/path to see if you need to restart
+            if found_room == "overtime":
+                return "overtime"
+            qq.enqueue(found_room)
+            # after finding a nearby unvisited room, trim the stack to something managable
+            def visited_length2(e):
+                return e['visited_length']
+            qq.queue.sort(key=visited_length2, reverse=True)
+            qq.queue = qq.queue[:300]
+
+def find_unvisited(data, start_time):
+    # create a new queue with the current data inside
+    qq2 = Queue()
+    qq2.enqueue(data)
+    # Loop until you find a nearby unvisited room
+    while True:
+        # shorten the queue if it's too long
+        if len(qq2.queue) > 100000:
+            def visited_length(e):
+                return e['visited_length']
+            qq2.queue.sort(key=visited_length, reverse=True)
+            qq2.queue = qq2.queue[:50000]
+
+        current_data = qq2.dequeue()
+
+        current_time = timer()
+        if len(current_data['path']) >= 960:
+            return "overtime"
+        elif current_time - start_time > .5:
+            return "overtime"
+
+        current_exits = current_data['current_room'].get_exits()
+
+        # get a list of the actual rooms based on the exits - along with their direction and times visited
+        adjacent_rooms = []
+        for direction in current_exits:
+            if direction == "n":
+                new_room = current_data['current_room'].n_to
+                try:
+                    adjacent_rooms.append({ 'direction': 'n', 'room': new_room, 'times_visited': current_data['visited'][new_room.id] })
+                except:
+                    adjacent_rooms.append({ 'direction': 'n', 'room': new_room, 'times_visited': 0 })
+            elif direction == "s":
+                new_room = current_data['current_room'].s_to
+                try:
+                    adjacent_rooms.append({ 'direction': 's', 'room': new_room, 'times_visited': current_data['visited'][new_room.id] })
+                except:
+                    adjacent_rooms.append({ 'direction': 's', 'room': new_room, 'times_visited': 0 })
+            elif direction == "e":
+                new_room = current_data['current_room'].e_to
+                try:
+                    adjacent_rooms.append({ 'direction': 'e', 'room': new_room, 'times_visited': current_data['visited'][new_room.id] })
+                except:
+                    adjacent_rooms.append({ 'direction': 'e', 'room': new_room, 'times_visited': 0 })
+            elif direction == "w":
+                new_room = current_data['current_room'].w_to
+                try:
+                    adjacent_rooms.append({ 'direction': 'w', 'room': new_room, 'times_visited': current_data['visited'][new_room.id] })
+                except:
+                    adjacent_rooms.append({ 'direction': 'w', 'room': new_room, 'times_visited': 0 })
+        
+        # filter for only the unvisited rooms
+        unvisited_rooms = []
+        for room_dict in adjacent_rooms:
+            if room_dict['times_visited'] == 0:
+                unvisited_rooms.append(room_dict)
+        
+        # if there are adjacent unvisited rooms, go to that room
+        if len(unvisited_rooms) > 0:
+            # take the first room
+            found_room = unvisited_rooms[0]
+            # update the visited list for the new room
+            new_visited = current_data['visited'].copy()
+            new_visited[found_room['room'].id] = 1
+            # update the path
+            new_path = current_data['path'] + [found_room['direction']]
+            # compile the new data and enqueue it
+            new_data = {'visited': new_visited, 'path': new_path, 'current_room': found_room['room'], 'visited_length': len(new_visited)}
+            # return the new data
+            # print("new room found")
+            return(new_data)
+        else:
+            # sort the adjacent rooms by times visited
+            def visited_key(e):
+                return e['times_visited']
+            adjacent_rooms.sort(key=visited_key)
+
+            # enqueue the adjacent rooms
+            for adj_dict in adjacent_rooms:
+                # update the visited list for the new room
+                new_visited = current_data['visited'].copy()
+                try:
+                    new_visited[adj_dict['room'].id] += 1
+                except:
+                    new_visited[adj_dict['room'].id] = 1
+                # update the path
+                new_path = current_data['path'] + [adj_dict['direction']]
+                # compile the new data and enqueue it
+                new_data = {'visited': new_visited, 'path': new_path, 'current_room': adj_dict['room'], 'visited_length': len(new_visited)}
+                qq2.enqueue(new_data)
+
+def bft_path_container():
+    while True:
+        start = timer()
+        response = bft_path2(start)
+        if response == "overtime":
+            print(f"restarting - {start}")
+        else:
+            global traversal_path
+            traversal_path = response
+            break
+
+bft_path_container()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # TRAVERSAL TEST
 visited_rooms = set()
@@ -51,12 +580,18 @@ else:
 #######
 # UNCOMMENT TO WALK AROUND
 #######
-player.current_room.print_room_description(player)
-while True:
-    cmds = input("-> ").lower().split(" ")
-    if cmds[0] in ["n", "s", "e", "w"]:
-        player.travel(cmds[0], True)
-    elif cmds[0] == "q":
-        break
-    else:
-        print("I did not understand that command.")
+# player.current_room.print_room_description(player)
+# while True:
+#     cmds = input("-> ").lower().split(" ")
+#     if cmds[0] in ["n", "s", "e", "w"]:
+#         player.travel(cmds[0], True)
+#     elif cmds[0] == "q":
+#         break
+#     else:
+#         print("I did not understand that command.")
+
+
+
+
+            
+
